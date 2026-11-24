@@ -1,0 +1,81 @@
+# =============================================================================
+# Configuração do pipeline-lakehouse
+# -----------------------------------------------------------------------------
+# Você NÃO precisa editar código Python para adicionar arquivos: basta colocá-los
+# em data/input/. Este arquivo só é necessário para ajustar a leitura de casos
+# específicos (delimitador, cabeçalho, codificação, formato do JSON etc.).
+# Caminhos relativos são resolvidos a partir da raiz do projeto.
+# =============================================================================
+
+paths:
+  input_dir: data/input          # onde ficam os arquivos de entrada
+  lakehouse_dir: data/lakehouse  # bronze/, silver/, gold/ e _control/
+  log_dir: data/logs             # logs de cada execução
+
+spark:
+  master: "local[*]"     # usa todos os núcleos da máquina
+  driver_memory: "2g"
+  shuffle_partitions: 4
+  java_home: ""          # opcional: caminho de um JDK 8/11/17/21 (ex.: "C:/Program Files/Java/jdk-17")
+
+# -----------------------------------------------------------------------------
+# Padrões de leitura por formato (detectado pela extensão: .csv, .json, .txt)
+# -----------------------------------------------------------------------------
+read_defaults:
+  encoding: auto          # auto (UTF-8, senão Windows-1252) | utf-8 | latin-1 | windows-1252 ...
+  csv:
+    delimiter: auto       # auto | "," | ";" | "\t" | "|" | tab | pipe | semicolon | comma
+    header: true          # a primeira linha contém os nomes das colunas?
+    quote: '"'
+    escape: '"'
+    multiline: true       # permite quebras de linha dentro de campos entre aspas
+  txt:
+    mode: auto            # auto | delimited (tabular) | plain (uma linha = um registro)
+    delimiter: auto
+    header: true
+    quote: '"'
+    escape: '"'
+    multiline: true
+  json:
+    multiline: auto       # auto | true (array/objeto em várias linhas) | false (JSON Lines)
+
+# -----------------------------------------------------------------------------
+# Ajustes por arquivo (opcional). A chave é o nome do arquivo ou um padrão
+# (glob) como "vendas_*.csv". Todas as entradas que casarem são aplicadas, na
+# ordem em que aparecem. Opções aceitas: encoding, delimiter, header, quote,
+# escape, multiline, mode (só TXT) e dataset (nome da tabela de destino).
+#
+# Exemplos:
+#   "relatorio.txt":
+#     mode: delimited
+#     delimiter: ";"
+#   "notas.txt":
+#     mode: plain
+#   "export_*.csv":
+#     encoding: latin-1
+#     header: false
+#     dataset: exportacoes      # vários arquivos -> uma única tabela
+#   "eventos.json":
+#     multiline: false          # JSON Lines (um objeto por linha)
+# -----------------------------------------------------------------------------
+files: {}
+
+# -----------------------------------------------------------------------------
+# Camada Silver (limpeza e padronização genéricas)
+# -----------------------------------------------------------------------------
+silver:
+  # textos tratados como nulo (comparação sem diferenciar maiúsculas/minúsculas)
+  null_tokens: ["", "null", "none", "nan", "na", "n/a", "n.a.", "nil", "-", "--", "?", "#n/d", "#n/a", "(null)", "undefined"]
+  # fração mínima dos valores não nulos que precisa ser convertida com sucesso
+  # para que a coluna mude de tipo (0.95 = 95%). Use 1.0 para ser 100% conservador.
+  type_inference_threshold: 0.95
+  boolean_true: ["true", "t", "yes", "y", "sim", "s", "verdadeiro"]
+  boolean_false: ["false", "f", "no", "n", "nao", "não", "falso"]
+
+# -----------------------------------------------------------------------------
+# Camada Gold (métricas genéricas para o dashboard)
+# -----------------------------------------------------------------------------
+gold:
+  top_values: 15                 # quantos valores mais frequentes guardar por coluna
+  histogram_bins: 20             # número de faixas dos histogramas numéricos
+  categorical_max_distinct: 50   # texto com até N valores distintos = "categórico"

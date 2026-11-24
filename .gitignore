@@ -1,0 +1,32 @@
+# Ambiente Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Saídas do pipeline (lakehouse, logs, temporários)
+data/lakehouse/
+data/logs/
+data/tmp/
+
+# Arquivos de entrada do usuário (os de exemplo são gerados por generate_sample_data.py)
+data/input/*
+!data/input/.gitkeep
+
+# Artefatos do Spark / Hive
+spark-warehouse/
+metastore_db/
+derby.log
+*.crc
+
+# Cache local (JARs do Delta baixados, HADOOP_HOME vazio do Windows, build Java)
+.cache/
+tools/windows/build/
+
+# IDE / SO
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

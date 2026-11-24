@@ -1,0 +1,3 @@
+# Mantém o Streamlit 100% local: não envia estatísticas de uso para a internet.
+[browser]
+gatherUsageStats = false

@@ -1,0 +1,21 @@
+# Versões fixadas e testadas juntas. Requer Python 3.11 ou 3.12 (testado com 3.11).
+# (pandas 3 / numpy 2.4 exigem Python >= 3.11; o PySpark 3.5 não suporta oficialmente o 3.13.)
+# pyspark 3.5.x <-> delta-spark 3.2.x são um par compatível.
+pyspark==3.5.3
+delta-spark==3.2.1
+
+# Leitura rápida das tabelas Delta no dashboard (delta-rs, sem Spark)
+deltalake==1.7.0
+pyarrow==26.0.1
+pandas==3.1.1
+numpy==2.4.6
+
+# Dashboard
+streamlit==1.67.0
+plotly==7.1.0
+
+# Configuração
+PyYAML==6.0.4
+
+# Testes
+pytest==9.2.0
